@@ -324,21 +324,11 @@ Generate roughly 100 requests per second (20 workers × 5 requests per second) f
 hey -z 15m -c 20 -q 5 https://api.cloudwithdarvin.com/notes
 ```
 
-![Scale-out policy](Screenshot%20verification/19-Scale-out%20policies%201.png)
-
 After about 10 to 15 minutes the policy added instances, reaching the configured **maximum of 6**. No further instances
-are launched beyond that cap, even under high CPU.
-
-![Scale-out result](Screenshot%20verification/19-Scale-out%20policies%202.png)
-
-After health checks pass, the ALB routes traffic to all instances.
-
-![Target group after scale-out](Screenshot%20verification/19-Scale-out%20policies%203.png)
+are launched beyond that cap, even under high CPU. After health checks pass, the ALB routes traffic to all instances.
 
 When the load stops, instances are removed one by one until the group returns to the desired capacity. Without a
 scale-in policy the group would stay large and defeat the purpose of auto scaling.
-
-![Scale-in](Screenshot%20verification/20-19-Scale-in%20policies%201.png)
 
 #### Scale-out: CPU stress test
 
