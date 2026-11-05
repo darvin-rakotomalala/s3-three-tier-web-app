@@ -3,7 +3,6 @@
 ############################################
 
 # Latest Ubuntu 24.04 LTS (Noble Numbat) AMI, owned by Canonical
-/*
 data "aws_ami" "ubuntu_ami" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
@@ -23,8 +22,8 @@ data "aws_ami" "ubuntu_ami" {
     values = ["ebs"]
   }
 }
-*/
 
+/*
 data "aws_ssm_parameter" "linux_ami" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
@@ -36,10 +35,11 @@ data "aws_ami" "linux" {
   }
   owners = ["amazon"]
 }
+*/
 
 resource "aws_launch_template" "web_fleet" {
   name_prefix   = "${var.environment}-web-fleet-"
-  image_id      = data.aws_ssm_parameter.linux_ami.value # data.aws_ami.ubuntu_ami.id
+  image_id      = data.aws_ami.ubuntu_ami.id # data.aws_ssm_parameter.linux_ami.value
   instance_type = var.instance_type
 
   iam_instance_profile {
@@ -59,7 +59,7 @@ resource "aws_launch_template" "web_fleet" {
   }
 
   block_device_mappings {
-    device_name = data.aws_ami.linux.root_device_name # data.aws_ami.ubuntu_ami.root_device_name
+    device_name = data.aws_ami.ubuntu_ami.root_device_name # data.aws_ami.linux.root_device_name
     ebs {
       volume_size           = 30
       volume_type           = "gp3"
@@ -73,9 +73,13 @@ resource "aws_launch_template" "web_fleet" {
     enabled = true # Detailed CloudWatch monitoring (1-minute granularity)
   }
 
+  user_data = filebase64("${path.module}/user_data.sh")
+
+  /*
   user_data = base64encode(templatefile("${path.module}/../user_data/user_data.tpl", {
     Parameter_Name = var.ssm_parameter_name
   }))
+  */
 
   tag_specifications {
     resource_type = "instance"

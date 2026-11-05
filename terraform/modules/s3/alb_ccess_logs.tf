@@ -5,7 +5,7 @@
 # ---------- S3 Bucket for ALB Access Logs ----------
 resource "aws_s3_bucket" "alb_logs" {
   bucket        = "${var.naming_prefix}-alb-access-logs-${var.current_account_id}"
-  force_destroy = false # Set to true only if you want Terraform to delete non-empty buckets on destroy
+  force_destroy = true # Set to true only if you want Terraform to delete non-empty buckets on destroy
 
   tags = merge(var.common_tags, {
     Name = "${var.naming_prefix}-alb-access-logs"
