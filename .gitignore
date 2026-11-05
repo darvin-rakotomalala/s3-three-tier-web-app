@@ -1,0 +1,149 @@
+# =============================================================================
+# Terraform
+# =============================================================================
+# Local provider/module cache
+**/.terraform/*
+
+# State files (may contain secrets; use a remote backend like S3 instead)
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Variable files that commonly hold secrets or environment-specific values.
+# Remove a line if you intentionally commit a non-sensitive tfvars file.
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# Override files (local-only tweaks)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Saved plan files
+*.tfplan
+tfplan
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# NOTE: .terraform.lock.hcl is intentionally NOT ignored.
+# HashiCorp recommends committing it so everyone uses the same provider versions.
+
+# =============================================================================
+# Java / Spring Boot - Maven
+# =============================================================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# =============================================================================
+# Java / Spring Boot - Gradle
+# =============================================================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# =============================================================================
+# Java - compiled output and packaged artifacts
+# =============================================================================
+*.class
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# Keep the Maven/Gradle wrappers
+!.mvn/wrapper/maven-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# =============================================================================
+# Spring Boot local config and secrets
+# =============================================================================
+application-local.properties
+application-local.yml
+application-local.yaml
+application-secret*.properties
+application-secret*.yml
+*.env
+.env
+.env.*
+
+# =============================================================================
+# IntelliJ IDEA
+# =============================================================================
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# =============================================================================
+# Other IDEs
+# =============================================================================
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# =============================================================================
+# OS files
+# =============================================================================
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# =============================================================================
+# Misc
+# =============================================================================
+*.swp
+*.swo
+*.bak
+*.tmp
