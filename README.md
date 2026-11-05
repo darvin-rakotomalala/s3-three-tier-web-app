@@ -3,7 +3,7 @@
 A secure, highly available and auto-scaling three-tier web application on AWS, defined entirely as code with Terraform
 and deployed through GitHub Actions using keyless (OIDC) authentication.
 
-- **Presentation tier:** static frontend on Amazon S3, delivered through CloudFront with WAF protection
+- **Presentation tier:** Static frontend on Amazon S3, delivered through CloudFront with WAF protection
 - **Application tier:** Java Spring Boot REST API on EC2 Auto Scaling instances in private subnets, behind an
   Application Load Balancer
 - **Data tier:** Amazon RDS for PostgreSQL (Multi-AZ) in isolated database subnets
@@ -227,11 +227,12 @@ Developer push → GitHub → GitHub Actions → OIDC → temporary IAM role →
 When code is pushed, a GitHub Actions workflow requests short-lived credentials from AWS through OIDC. The assumed IAM
 role has only the permissions needed to deploy.
 
-| Workflow             | Purpose                                                                           |
-|:---------------------|:----------------------------------------------------------------------------------|
-| `checkov.yml`        | Scans Terraform for misconfigurations on the repository and on every pull request |
-| `deploy_infra.yml`   | Provisions the infrastructure with Terraform                                      |
-| `deploy_backend.yml` | Deploys the Spring Boot JAR from S3 to the EC2 instances                          |
+| Workflow              | Purpose                                                                           |
+|:----------------------|:----------------------------------------------------------------------------------|
+| `checkov.yml`         | Scans Terraform for misconfigurations on the repository and on every pull request |
+| `deploy_infra.yml`    | Provisions the infrastructure with Terraform                                      |
+| `deploy_frontend.yml` | Deploys the frontend website to S3                                                |
+| `deploy_backend.yml`  | Deploys the Spring Boot JAR from S3 to the EC2 instances                          |
 
 ---
 
@@ -261,7 +262,7 @@ $ terraform plan -var-file="terraform.tfvars" -no-color -out=TFplan.JSON
 $ terraform apply -var-file="terraform.tfvars" -auto-approve
 ```
 
-![Terraform outputs](Screenshot%20verification/1-Outputs.png)
+![1-Outputs.png](Screenshot%20verification/1-Outputs.png)
 
 ### 8.2 Move state to a remote backend (recommended)
 
@@ -271,7 +272,7 @@ $ terraform apply -var-file="terraform.tfvars" -auto-approve
 ### 8.3 Deploy through GitHub Actions
 
 Push to the repository to run the workflows described in [CI/CD](#6-cicd). The infrastructure and application are
-deployed by `deploy_infra.yml` and `deploy_backend.yml`.
+deployed by `deploy_infra.yml`, `deploy_fontend.yml` and `deploy_backend.yml`.
 
 ---
 
@@ -410,11 +411,7 @@ This release delivers the core three-tier foundation. Planned enhancements:
 
 ## 13. Cleanup
 
-Destroy all resources to stop charges:
-
-```bash
-terraform destroy -var-file="terraform.tfvars" -auto-approve"
-```
+Destroy all resources to stop charges: `terraform destroy -var-file="terraform.tfvars" -auto-approve"`
 
 ---
 
