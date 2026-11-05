@@ -1,0 +1,3 @@
+INSERT INTO tutorials (id, title, description, published) VALUES (1, 'Spring Boot Basics', 'Learn Spring Boot', true) ON CONFLICT (id) DO NOTHING;
+INSERT INTO tutorials (id, title, description, published) VALUES (2, 'JPA & Hibernate', 'Database with JPA', false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO tutorials (id, title, description, published) VALUES (3, 'REST APIs', 'Build REST APIs', true) ON CONFLICT (id) DO NOTHING;
