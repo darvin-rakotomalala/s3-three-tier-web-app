@@ -14,7 +14,7 @@ resource "random_password" "db_master" {
 }
 
 resource "aws_secretsmanager_secret" "db_credentials" {
-  name                    = "${var.naming_prefix}/rds/backend-db-credentials"
+  name                    = "${var.naming_prefix}/rds/db-credentials"
   description             = "Master credentials for the ${var.naming_prefix} RDS PostgreSQL instance"
   kms_key_id              = var.kms_secrets_key_arn
   recovery_window_in_days = 7

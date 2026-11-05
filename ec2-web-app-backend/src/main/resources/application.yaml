@@ -17,7 +17,7 @@ spring:
   datasource:
     driver-class-name: com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver
     url: jdbc-secretsmanager:postgresql://three-tier-dev-rds-postgres.conyo2aki51n.us-east-1.rds.amazonaws.com:5432/threetierdb
-    username: three-tier-dev/rds/backend-db-credentials
+    username: three-tier-dev/rds/db-credentials
 
   sql:
     init:
