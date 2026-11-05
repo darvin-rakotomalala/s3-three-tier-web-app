@@ -149,20 +149,20 @@ jobs:
       - name: Deploy JAR via SSM
         id: ssm-deploy
         run: |
-          cat << EOF > params.json
-          {
-            "commands": [
-              "set -e",
-              "mkdir -p ${{ env.APP_DIR }}",
-              "aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.JAR_NAME }} ${{ env.APP_DIR }}/${{ env.JAR_NAME }}",
-              "chown -R ubuntu:ubuntu ${{ env.APP_DIR }}",
-              "pkill -f ${{ env.JAR_NAME }} || true",
-              "systemctl restart springboot-app",
-              "sleep 5",
-              "echo 'Deployment commands executed successfully'"
-            ]
-          }
-          EOF
+            cat << EOF > params.json
+            {
+              "commands": [
+                "set -e",
+                "mkdir -p ${{ env.APP_DIR }}",
+                "aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.JAR_NAME }} ${{ env.APP_DIR }}/${{ env.JAR_NAME }}",
+                "chown -R ec2-user:ec2-user ${{ env.APP_DIR }}",
+                "pkill -f ${{ env.JAR_NAME }} || true",
+                "systemctl restart springboot-app",
+                "sleep 5",
+                "echo 'Deployment commands executed successfully'"
+              ]
+            }
+            EOF
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ env.INSTANCE_ID }}" \
