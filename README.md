@@ -349,7 +349,7 @@ Figures below are indicative; validate them with the AWS Pricing Calculator.
 | **Delivery**      | CloudFront caching reduces repeated origin requests                                         | n/a                        |
 | **Governance**    | Cost Explorer, budget alerts at 80%, remove unused resources                                | n/a                        |
 
-**---
+---
 
 ## 11. Well-Architected Alignment
 
