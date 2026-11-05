@@ -301,16 +301,8 @@ After deployment, the site is live at `https://cloudwithdarvin.com/` over a veri
 1. In the console, select an instance and choose **Instance state → Terminate instance**.
 2. Refresh the application URL. Traffic is now served by the one remaining instance.
 3. Open the Auto Scaling group's activity history to see the replacement launch.
-
-![Terminate an EC2 instance](Screenshot%20verification/17-Terminate%20one%20of%20the%20EC2%20instances%201.png)
-
 4. A new instance starts in the **same Availability Zone** as the terminated one.
-
-![New EC2 instance](Screenshot%20verification/18-New%20Amazon%20EC2%20instance%201.png)
-
 5. Once healthy, it joins the ALB target group and receives traffic (*EC2 → Load Balancing → Target Groups*).
-
-![Target group](Screenshot%20verification/18-New%20Amazon%20EC2%20instance%203.png)
 
 This works because the Auto Scaling group's `desired_capacity` is 2. Unlike a standalone EC2 instance, the group
 replaces the failed instance and registers it with the load balancer automatically.
@@ -321,7 +313,7 @@ Generate roughly 100 requests per second (20 workers × 5 requests per second) f
 [`hey`](https://github.com/rakyll/hey):
 
 ```bash
-hey -z 15m -c 20 -q 5 https://api.cloudwithdarvin.com/notes
+hey -z 15m -c 20 -q 5 https://api.cloudwithdarvin.com/health
 ```
 
 After about 10 to 15 minutes the policy added instances, reaching the configured **maximum of 6**. No further instances
