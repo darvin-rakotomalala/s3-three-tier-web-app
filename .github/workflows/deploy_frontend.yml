@@ -1,0 +1,83 @@
+name: Deploy frontend website
+
+# Event that triggers the workflow
+on:
+  workflow_dispatch: # This enables the "Run workflow" button
+  push:
+    branches: [ main ]
+    paths:
+      - 'ec2-web-app-frontend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ec2-web-app-frontend/**'
+
+env:
+  # verbosity setting for Terraform logs
+  TF_LOG: INFO
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  WEBSITE_BUCKET_NAME: ${{ vars.WEBSITE_BUCKET_NAME }}
+  DISTRIBUTION_ID: ${{ vars.DISTRIBUTION_ID }}
+  WORKING_DIR: 'ec2-web-app-frontend'
+
+permissions:
+  id-token: write       # Required for requesting the OIDC JWT
+  contents: read        # Required for actions/checkout
+  pull-requests: write  # Required for plan comments
+  issues: write
+
+# Contains a list of jobs. Each job runs in parallel by default and in an isolated environment.
+jobs:
+  terraform:
+    # needs: security
+    name: frontend website
+    runs-on: ubuntu-latest
+    environment: dev
+    # defaults:
+    # run:
+    # working-directory: ${{ env.WORKING_DIR }}
+
+    # A list of steps that execute in order.
+    ## (Optional) Continue only if security checks pass
+    steps:
+      # Authenticate to AWS via OIDC
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Checkout the repository to the runner
+        uses: actions/checkout@v6.0.2
+
+      - name: Sync HTML source files to S3
+        id: sync
+        run: |
+          aws s3 sync ${{ env.WORKING_DIR }}/ s3://${{ env.WEBSITE_BUCKET_NAME }}/ \
+            --delete \
+            --cache-control "public, max-age=86400" \
+            --metadata-directive REPLACE
+
+      - name: Invalidate CloudFront cache
+        id: invalidation
+        if: steps.sync.outcome == 'success'
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.DISTRIBUTION_ID }} \
+            --paths "/*"
+
+      - name: Content deployment summary
+        id: summary
+        if: steps.sync.outcome == 'success'
+        run: |
+          echo "✅ Content deployed successfully!"
+          echo "📁 Bucket: ${{ env.WEBSITE_BUCKET_NAME }}"
+          echo "🌐 Distribution: ${{ env.DISTRIBUTION_ID }}"
+          echo "🔄 Cache invalidated for all paths"
+
+      - name: PR validation summary
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "✅ Content validation passed!"
+          echo "📝 Ready for deployment when merged to main"

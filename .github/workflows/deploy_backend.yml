@@ -1,0 +1,199 @@
+name: Deploy backend to EC2 via SSM
+
+# Event that triggers the workflow
+on:
+  workflow_dispatch: # This enables the "Run workflow" button
+  push:
+    branches: [ main ]
+    paths:
+      - 'ec2-web-app-backend/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'ec2-web-app-backend/**'
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+  KMS_KEY_ARN: ${{ vars.KMS_KEY_ARN }}
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
+  JAR_NAME: ${{ vars.JAR_NAME }}
+  APP_DIR: ${{ vars.APP_DIR }}
+  ASG_NAME: ${{ vars.ASG_NAME }}
+  WORKING_DIR: 'ec2-web-app-backend'
+
+permissions:
+  id-token: write       # Required for requesting the OIDC JWT
+  contents: read        # Required for actions/checkout
+  pull-requests: write  # Required for plan comments
+  issues: write
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Step 1 - Build the Spring Boot JAR and publish it to S3
+  # ---------------------------------------------------------------------
+  build:
+    name: build-app
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build JAR with Maven
+        working-directory: ${{ env.WORKING_DIR }}
+        run: mvn clean package -DskipTests
+
+      - name: Rename JAR
+        working-directory: ${{ env.WORKING_DIR }}
+        run: |
+          cd target
+          mv ec2-web-app-backend-0.0.1-SNAPSHOT.jar ec2-web-app-backend.jar
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload JAR to S3
+        if: github.event_name != 'pull_request'
+        run: |
+          aws s3 cp ${{ env.WORKING_DIR }}/target/${{ env.JAR_NAME }} \
+            s3://${{ env.S3_BUCKET }}/${{ env.JAR_NAME }} \
+            --sse aws:kms \
+            --sse-kms-key-id ${{ env.KMS_KEY_ARN }}
+
+  # ---------------------------------------------------------------------
+  # Step 2 - Ask the Auto Scaling group which instances are running now
+  # ---------------------------------------------------------------------
+  discover:
+    name: discover-instances
+    needs: build
+    # Don't deploy from pull requests - build/validate only
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: dev
+    outputs:
+      instance_ids: ${{ steps.asg.outputs.instance_ids }}
+    steps:
+      - name: Configure AWS Credentials
+        if: github.event_name != 'pull_request'
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get InService instances from the Auto Scaling group
+        id: asg
+        run: |
+          IDS=$(aws autoscaling describe-auto-scaling-groups \
+            --auto-scaling-group-names "${{ env.ASG_NAME }}" \
+            --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService'].InstanceId" \
+            --output json | jq -c '. // [] | sort')
+
+          if [ "$(echo "$IDS" | jq 'length')" -eq 0 ]; then
+            echo "::error::No InService instances found in ${{ env.ASG_NAME }}"
+            exit 1
+          fi
+
+          echo "Instances to deploy: $IDS"
+          echo "instance_ids=$IDS" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------------------
+  # Step 3 - Deploy the JAR from S3 onto each EC2 instance via SSM
+  #          One matrix job per instance, rolled out one at a time.
+  # ---------------------------------------------------------------------
+  deploy:
+    name: deploy-app (${{ matrix.instance_id }})
+    needs: discover
+    runs-on: ubuntu-latest
+    environment: dev
+    strategy:
+      max-parallel: 1   # Rolling deploy: one instance at a time
+      fail-fast: true   # Stop the rollout if an instance fails, so the rest keep the old version
+      matrix:
+        instance_id: ${{ fromJSON(needs.discover.outputs.instance_ids) }}
+    env:
+      INSTANCE_ID: ${{ matrix.instance_id }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Wait for instance to be SSM-online
+        run: |
+          for i in $(seq 1 30); do
+            PING=$(aws ssm describe-instance-information \
+              --filters "Key=InstanceIds,Values=${{ env.INSTANCE_ID }}" \
+              --query "InstanceInformationList[0].PingStatus" --output text)
+            if [ "$PING" = "Online" ]; then
+              echo "Instance is SSM-online."
+              exit 0
+            fi
+            echo "Attempt $i: SSM status is '$PING', waiting..."
+            sleep 10
+          done
+          echo "::error::${{ env.INSTANCE_ID }} never became SSM-online"
+          exit 1
+
+      - name: Deploy JAR via SSM
+        id: ssm-deploy
+        run: |
+          cat << EOF > params.json
+          {
+            "commands": [
+              "set -e",
+              "mkdir -p ${{ env.APP_DIR }}",
+              "aws s3 cp s3://${{ env.S3_BUCKET }}/${{ env.JAR_NAME }} ${{ env.APP_DIR }}/${{ env.JAR_NAME }}",
+              "chown -R ubuntu:ubuntu ${{ env.APP_DIR }}",
+              "pkill -f ${{ env.JAR_NAME }} || true",
+              "systemctl restart springboot-app",
+              "sleep 5",
+              "echo 'Deployment commands executed successfully'"
+            ]
+          }
+          EOF
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ env.INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters file://params.json \
+            --timeout-seconds 120 \
+            --comment "Deploy JAR Spring Boot application to ${{ env.INSTANCE_ID }}" \
+            --query "Command.CommandId" \
+            --output text)
+          echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment to complete
+        run: |
+          # Short pause so the invocation record exists before we start polling
+          sleep 3
+          aws ssm wait command-executed \
+            --command-id ${{ steps.ssm-deploy.outputs.command_id }} \
+            --instance-id ${{ env.INSTANCE_ID }}
+
+      - name: Verify deployment result
+        if: always() && steps.ssm-deploy.outputs.command_id != ''
+        run: |
+          RESULT=$(aws ssm get-command-invocation \
+            --command-id ${{ steps.ssm-deploy.outputs.command_id }} \
+            --instance-id ${{ env.INSTANCE_ID }} \
+            --query "{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}" \
+            --output json)
+          echo "$RESULT" | jq .
+          STATUS=$(echo "$RESULT" | jq -r '.Status')
+          if [ "$STATUS" != "Success" ]; then
+            echo "::error::Deployment to ${{ env.INSTANCE_ID }} failed with status: $STATUS"
+            exit 1
+          fi
+          echo "Deployment to ${{ env.INSTANCE_ID }} succeeded."
