@@ -266,7 +266,7 @@ $ terraform apply -var-file="terraform.tfvars" -auto-approve
 
 ### 8.2 Move state to a remote backend (recommended)
 
-1. Enable the backend configuration in `terraform_V1_KO`
+1. Enable the backend configuration in `terraform`
 2. Migrate the state: `terraform init -migrate-state`
 
 ### 8.3 Deploy through GitHub Actions
@@ -280,6 +280,10 @@ deployed by `deploy_infra.yml`, `deploy_fontend.yml` and `deploy_backend.yml`.
 
 Technical specifications are in the `Documentation` directory and all screenshots are in `Screenshot verification`.
 After deployment, the site is live at `https://cloudwithdarvin.com/` over a verified HTTPS connection.
+
+![12-Frontend root domain.png](Screenshot%20verification/12-Frontend%20root%20domain.png)
+
+![13-Frontend www domain.png](Screenshot%20verification/13-Frontend%20www%20domain.png)
 
 ### 9.1 API endpoints
 
@@ -377,7 +381,7 @@ Figures below are indicative; validate them with the AWS Pricing Calculator.
 
 This release delivers the core three-tier foundation. Planned enhancements:
 
-**Resilience and disaster recovery**
+### Resilience and disaster recovery
 
 - **RDS backups:** daily automated backups (7-day retention), weekly manual snapshots (30-day retention), daily
   cross-region snapshot copy to `us-west-2`, managed with AWS Backup
@@ -389,18 +393,18 @@ This release delivers the core three-tier foundation. Planned enhancements:
 - Define **RPO** (how much data can be lost) and **RTO** (how quickly service must return) per environment, and size
   the backup strategy to those targets rather than taking as many backups as possible
 
-**Platform**
+### Platform
 
 - Amazon EFS for shared storage across application servers
 - ElastiCache for Redis (cluster mode) for session and data caching, with automatic node replacement
 - Route 53 geolocation routing for a multi-region setup
 
-**Security**
+### Security
 
 - Amazon Cognito for authentication
 - GuardDuty, Security Hub, AWS Config and Inspector for continuous detection and compliance
 
-**Operations**
+### Operations
 
 - Blue-green or canary deployments with automated rollback
 - CloudWatch Synthetics for external monitoring
