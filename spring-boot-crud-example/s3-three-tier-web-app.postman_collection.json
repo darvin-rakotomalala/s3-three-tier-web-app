@@ -1,0 +1,218 @@
+{
+	"info": {
+		"_postman_id": "4bfa77d3-e489-4091-8379-51d2749e293f",
+		"name": "s3-three-tier-web-app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13359435"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/health",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Tutorial",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"title\": \"Test POST REST APIs\",\n    \"description\": \"My test POST Build REST APIs\",\n    \"published\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve all Tutorials",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Retrieve Tutorial by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials/1",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Tutorial",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"description\": \"My test PUT Build REST APIs\",\n    \"published\": true,\n    \"title\": \"Test PUT REST APIs\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials/1",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Tutorial by Id",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials/1",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete all Tutorials",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find all published Tutorials",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials/published",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials",
+						"published"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find all Tutorials which title contains keyword",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.cloudwithdarvin.com/tutorials?title=Test",
+					"protocol": "https",
+					"host": [
+						"api",
+						"cloudwithdarvin",
+						"com"
+					],
+					"path": [
+						"tutorials"
+					],
+					"query": [
+						{
+							"key": "title",
+							"value": "Test"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
