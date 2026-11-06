@@ -1,37 +1,37 @@
 # ─── Adjust for your environment ────────────────────────────────────
 primary_region      = "us-east-1"
 environment         = "dev"
-project_name        = "three-tier"
+project_name        = "s3-three-tier"
 team_name           = "training"
 cost_center         = "engineering"
 compliance          = "internal"
 github_org          = "darvin-rakotomalala"
 github_repo         = "s3-three-tier-web-app"
-bucket_name         = "ce-dev-terraform-state-69127"
 email_subscriptions = ["darvintojo@gmail.com"]
+bucket_name         = "ce-dev-terraform-state-69127"
+domain_name         = "cloudwithdarvin.com"
+source_files        = "../ec2-web-app-frontend"
 
-# ─── Frontend
-domain_name  = "cloudwithdarvin.com"
-source_files = "../ec2-web-app-frontend"
+###---- BACKEND PROVISIONING
 
-# ─── Backend
 vpc_cidr                        = "18.0.0.0/16"
 availability_zones              = ["us-east-1a", "us-east-1b", "us-east-1c"]
 single_nat_gateway              = false
 instance_type                   = "t3.medium"
 instance_type_overrides         = ["t3.medium", "t3a.medium", "t3.large"]
+alert_emails                    = ["darvintojo@gmail.com"]
 app_port                        = 8080
 db_port                         = 5432
-jar_bucket_name                 = "ce-dev-ec2-web-app-backend-jar-bucket-69127"
-jar_local_path                  = "ec2-web-app-backend.jar"
-jar_object_key                  = "ec2-web-app-backend.jar"
+jar_bucket_name                 = "ce-dev-springboot-jar-bucket-69127"
+jar_local_path                  = "spring-boot-crud-example.jar"
+jar_object_key                  = "spring-boot-crud-example.jar"
 api_subdomain                   = "api"
 origin_subdomain                = "origin"
 db_engine_version               = "16.4"
 db_instance_class               = "db.r5.large"
 db_allocated_storage            = 100
 db_max_allocated_storage        = 500
-db_name                         = "threetierdb"
+db_name                         = "asgcruddb"
 db_username                     = "app_admin"
 db_multi_az                     = true
 db_backup_retention_days        = 7

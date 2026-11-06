@@ -266,7 +266,7 @@ $ terraform apply -var-file="terraform.tfvars" -auto-approve
 
 ### 8.2 Move state to a remote backend (recommended)
 
-1. Enable the backend configuration in `terraform/backend.tf`
+1. Enable the backend configuration in `terraform_V1_KO`
 2. Migrate the state: `terraform init -migrate-state`
 
 ### 8.3 Deploy through GitHub Actions

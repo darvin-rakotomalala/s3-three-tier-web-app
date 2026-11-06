@@ -3,7 +3,7 @@
 A secure, highly available and auto-scaling three-tier web application on AWS, defined entirely as code with Terraform
 and deployed through GitHub Actions using keyless (OIDC) authentication.
 
-- **Presentation tier:** static frontend on Amazon S3, delivered through CloudFront with WAF protection
+- **Presentation tier:** Static frontend on Amazon S3, delivered through CloudFront with WAF protection
 - **Application tier:** Java Spring Boot REST API on EC2 Auto Scaling instances in private subnets, behind an
   Application Load Balancer
 - **Data tier:** Amazon RDS for PostgreSQL (Multi-AZ) in isolated database subnets

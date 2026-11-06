@@ -48,7 +48,7 @@ variable "github_repo" {
 }
 
 variable "domain_name" {
-  description = "Root domain name already hosted in Route 53 (e.g. cloudwithdarvin.com). Public traffic goes through CloudFront at this domain."
+  description = "The domain name for the website"
   type        = string
 }
 
@@ -62,8 +62,11 @@ variable "source_files" {
   type        = string
 }
 
-# ─── Backend
+###---- BACKEND PROVISIONING
 
+############################################
+# MAIN VARIABLES
+############################################
 
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
@@ -84,6 +87,11 @@ variable "availability_zones" {
 variable "single_nat_gateway" {
   description = "Use a single shared NAT Gateway instead of one per AZ. Set false (default) for full HA, one NAT Gateway per AZ, per the Technical Spec."
   type        = bool
+}
+
+variable "alert_emails" {
+  description = "Email addresses subscribed to the shared SNS alerts topic"
+  type        = list(string)
 }
 
 variable "app_port" {

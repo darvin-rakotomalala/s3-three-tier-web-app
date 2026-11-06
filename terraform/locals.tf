@@ -10,10 +10,5 @@ locals {
     # The timestamp() function returns a UTC timestamp string in RFC 3339 format.
     deployment_timestamp = timestamp()
   }
-
   naming_prefix = "${var.project_name}-${var.environment}"
-
-  principal_root_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-  principal_logs_arn = "logs.${var.primary_region}.amazonaws.com"
-  log_group_arn      = "arn:aws:logs:${var.primary_region}:${data.aws_caller_identity.current.account_id}:log-group:/${local.naming_prefix}/ec2/linux"
 }
